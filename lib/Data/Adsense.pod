@@ -1,0 +1,204 @@
+=encoding UTF-8
+
+=head1 NAME
+
+Data::Adsense - read a Google AdSense performance report
+
+=head1 SYNOPSIS
+
+    use Data::Adsense ':all';
+    my $data = read_adsense ('report.csv');
+    my @rows = $data->rows ();
+    for (@rows) {
+        print "On $_->[date_col], you earned ¥$_->[earnings_col].\n";
+    }
+
+
+=head1 DESCRIPTION
+
+This module reads a Google AdSense performance report file. The file
+in question is the one produced by clicking on the button "Export to
+Excel CSV" on the "Overview" ("Entire account by day") page.
+
+This module does not parse the "Finalised Earnings and Payments"
+report.
+
+=head1 FUNCTIONS
+
+=head2 read_adsense
+
+    my $data = read_adsense ('report.csv');
+
+This reads the data from F<report.csv> and stores it. The return value
+is an object, upon which various methods can be called to get the data.
+
+=head1 METHODS
+
+The following methods can be called on the return value of
+L</read_adsense>.
+
+=head2 titles
+
+    my @titles = $data->titles ();
+
+This returns the top row of titles from the file. These contain the
+names of the columns and the currency for the earnings, CPC, and RPM
+columns.
+
+=head2 rows
+
+    my @rows = $data->rows ();
+
+This returns an array containing all the numerical information from
+the file, one row per day. The elements are in the same order as the
+file and can be accessed using the constants (see L</CONSTANTS>).
+
+For example,
+
+    use Data::Adsense ':all';
+    my $data = read_adsense ('report.csv');
+    my @rows = $data->rows ();
+    my $max = -1;
+    my $mrow = -1;
+    for my $i (0..$#rows) {
+        my $e = $rows[$i][earnings_col];
+        if ($e > $max) {
+            $mrow = $i;
+            $max = $e;
+        }
+    }
+    print "You reached a maximum on $rows[$mrow][date_col] with the princely sum of $max.\n";
+    
+
+
+For the sake of calculational convenience, the percent signs are
+stripped from the click-through rate (CTR), but the numbers are left
+in the percentage form rather than being divided by 100.
+
+=head2 per_month
+
+    my @pm = $data->per_month ();
+
+This returns an array of values just like L</rows>, but per calendar
+month.
+
+For example,
+
+    use Data::Adsense ':all';
+    my $data = read_adsense ('report.csv');
+    my @monthly = $data->per_month ();
+    for (@monthly) {
+        print "You earned $_->[earnings_col] in $_->[date_col]\n";
+    }
+
+
+The CPC, CTR, and RPM are recalculated from the monthly values of
+earnings, views, and clicks, rather than averaged.
+
+Due to rounding in the original report, the earnings values differ by
+very small amounts from the sums shown on the Adsense performance
+report page.
+
+=head2 per_week
+
+    my @pw = $data->per_week ();
+
+This returns an array of values just like L</rows>, but per calendar
+week.
+
+For example,
+
+    use Data::Adsense ':all';
+    my $data = read_adsense ('report.csv');
+    my @weekly = $data->per_week (1);
+    for (@weekly) {
+        printf "You had CTR of %.3g%% in week $_->[date_col]\n", $_->[ctr_col];
+    }
+
+
+An optional second argument specifies a day of the week to start from,
+between one for Monday and seven for Sunday.
+
+    # start a week on Sunday.
+    my @pw = $data->per_week (7);
+
+The day of the week is calculated by L<Date::Calc>. Without a day of
+the week, the default is C<1> for Monday, which results in the same
+weekly values as the Google page. 
+
+In the returned array, the value of C<date_col> in this case is the
+number of the week, starting from one, plus the start and end dates of
+the week, between square brackets.
+
+The CPC, CTR, and RPM are recalculated from the weekly values of
+earnings, views and clicks, rather than averaged from the data.
+
+Due to rounding in the original report, the earnings values differ by
+very small amounts from the sums shown on the Adsense performance
+report page.
+
+=head1 CALCULATION FUNCTIONS
+
+The following functions calculate various numbers from the data.
+
+=head2 cpc
+
+    my $cpc = cpc ($earnings, $clicks);
+
+This calculates cost per click (C<$earnings/$clicks>). If C<$clicks>
+is zero, the return value is C<undef>.
+
+=head2 ctr
+
+    my $ctr = ctr ($clicks, $views);
+
+This calculates the click-through rate (C<$clicks / $views>)
+multiplied by 100. If C<$views> is zero, the return value is C<undef>.
+
+=head2 rpm
+
+    my $rpm = rpm ($earnings, $views);
+
+This calculates the revenue per mille, which is 
+
+    $earnings x 1000
+    ----------------
+         $views
+
+If C<$views> is zero, the return value is C<undef>.
+
+=head1 CONSTANTS
+
+The module contains constants C<date_col>, C<views_col>,
+C<clicks_col>, C<ctr_col>, C<cpc_col>, C<rpm_col>, and C<earnings_col>
+which are exported so that it is not necessary to remember which
+column contains which information. To obtain them all, use
+
+    use Data::Adsense ':all';
+
+=head1 SEE ALSO
+
+L<Data::Adsense::MonthFraction> offers a simple way to extrapolate
+views, clicks, or earnings to the current month's end.
+
+L<adstrapolate> is a command-line interface to
+Data::Adsense::MonthFraction.
+
+
+
+L<http://pcunix.hubpages.com/hub/Simple-Perl-Scripts-for-Google-Adsense> This blog post discusses parsing Adsense data in Perl.
+
+=head1 AUTHOR
+
+Ben Bullock, <bkb@cpan.org>
+
+=head1 COPYRIGHT & LICENCE
+
+This package and associated files are copyright (C) 2012-2013 Ben
+Bullock.
+
+You can use, copy, modify and redistribute this package and associated
+files under the Perl Artistic Licence or the GNU General Public
+Licence.
+
+

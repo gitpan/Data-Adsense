@@ -1,0 +1,17 @@
+examples/example.pl
+examples/month.pl
+examples/week.pl
+examples/zillionaire.pl
+lib/Data/Adsense.pm
+lib/Data/Adsense.pod
+lib/Data/Adsense/MonthFraction.pm
+lib/Data/Adsense/MonthFraction.pod
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+script/adstrapolate
+t/Data-Adsense.t
+t/README
+t/test-file.txt
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

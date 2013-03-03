@@ -1,0 +1,32 @@
+#!/home/ben/software/install/bin/perl
+use warnings;
+use strict;
+use Scalar::Util 'looks_like_number';
+use Data::Adsense::MonthFraction 'month_fraction';
+
+my ($fraction, $days, $days_so_far) = month_fraction ();
+printf "So far we are at %3.4g/$days days into the month [Google timezone].\n",
+    $days_so_far;
+for my $value (@ARGV) {
+    if (looks_like_number ($value)) {
+        my $xvalue = $value * $fraction;
+        printf "%g -> %g\n", $value, $xvalue;
+    }
+    else {
+        warn "'$value' doesn't look like a number.\n";
+    }
+}
+
+=head1 NAME
+
+adstrpolate - extrapolate monthly adsense values
+
+=head1 SYNOPSIS
+
+    adstrapolate 100 500 20
+
+Given numbers, it 
+
+# Local variables:
+# mode: perl
+# End:

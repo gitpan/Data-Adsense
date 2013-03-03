@@ -1,0 +1,14 @@
+build\.pl
+blib/.*
+.gitignore
+.git/.*
+Makefile$
+pm_to_blib
+MYMETA.*
+.*\.bak
+^Data-Adsense-[0-9.]/$
+^Data-Adsense-[0-9.]\.tar\.gz$
+# This generates the randomized file for testing.
+^randomize\.pl$
+.*\.pod\.tmpl
+misc
